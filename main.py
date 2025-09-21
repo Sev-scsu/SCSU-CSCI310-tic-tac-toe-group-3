@@ -1,29 +1,19 @@
 import random
+import threading
+import time
 
-nums = list(range(1, 10)) #number of spots available in tic tac toe board
+numbers = list(range(1, 10)) #number of spots available in tic tac toe board
+lock = threading.Lock()
 
-def pick_number(numbers):
-    if not numbers:
-        return None  # no numbers left
-    choice = random.choice(numbers)
-    numbers.remove(choice)
-    return choice
-
-
-
-def main():
-    nums = list(range(1, 10))  
-
-    print(pick_number(nums))  # random number from 1–9
-    print(nums)               # list now has one less number
-
-    return 0
-
-if __name__ == "__main__":
-    main()
-
-
-
+def pick_number(name):
+    global numbers
+    while True:
+        with lock:  # only one thread at a time can access the list
+            if not numbers: #if the list is empty
+                break
+            choice = random.choice(numbers)
+            numbers.remove(choice)
+            print(f"{name} picked {choice}, remaining: {numbers}")
 
 def print_board(board, x_positions, o_positions):
     """
@@ -49,3 +39,19 @@ def print_board(board, x_positions, o_positions):
         print(" | ".join(board_layout[i:i+3]))
         if i < 6:
             print("-" * 5)  # Print a separator line
+
+def main():
+
+    t1 = threading.Thread(pick_number("t1")) #creating a thread object that will run pick_number function
+    t2 = threading.Thread(pick_number("t2"))
+
+    t1.start() #this activates the thread
+    t2.start()
+    t1.join() #this will wait for t1 to finish before proceeding
+    t2.join()
+    
+
+    return 0
+
+if __name__ == "__main__":
+    main()
