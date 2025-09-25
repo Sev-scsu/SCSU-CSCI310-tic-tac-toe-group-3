@@ -29,7 +29,12 @@ def pick_number(player):
     global numbers, game_over
     while not game_over:
         with lock:  # only one thread at a time can access the list
-            if not numbers:# if the list is empty
+            if game_over:
+                break
+
+            # Find available moves
+            available = [i for i, cell in enumerate(board_layout) if cell == ' ']
+            if not available:
                 print("Game Over! It's a draw.")
                 game_over = True
                 break
